@@ -23,7 +23,7 @@ namespace FlowerShopFromUML
         {
             ID = id;
             Name = name;
-            Flowers = flowers ?? new List<Flower>(); 
+            Flowers = flowers ?? new List<Flower>(); // Jeśli nie ma kwiatków to utwórz nową listę kwiatów
             Price = price;
             InStock = inStock;
         }
