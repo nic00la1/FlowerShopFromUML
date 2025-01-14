@@ -276,6 +276,14 @@ internal class Program
         Console.Clear();
         Console.WriteLine("Podaj email klienta:");
         string email = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            Console.WriteLine("Email nie może być pusty.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
+
         Customer customer = shop.GetCustomerByEmail(email);
         if (customer == null)
         {
@@ -292,6 +300,11 @@ internal class Program
                 "Podaj nazwę bukietu (lub 'koniec' aby zakończyć):");
             string bouquetName = Console.ReadLine();
             if (bouquetName.ToLower() == "koniec") break;
+            if (string.IsNullOrWhiteSpace(bouquetName))
+            {
+                Console.WriteLine("Nazwa bukietu nie może być pusta.");
+                continue;
+            }
 
             Bouquet bouquet = shop.Bouquets.Find(b => b.Name == bouquetName);
             if (bouquet != null)
@@ -311,7 +324,16 @@ internal class Program
     {
         Console.Clear();
         Console.WriteLine("Podaj numer zamówienia do realizacji:");
-        int orderIndex = int.Parse(Console.ReadLine());
+        string input = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(input) ||
+            !int.TryParse(input, out int orderIndex))
+        {
+            Console.WriteLine("Nieprawidłowy numer zamówienia.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
+
         if (orderIndex < 0 || orderIndex >= shop.Orders.Count)
         {
             Console.WriteLine("Nieprawidłowy numer zamówienia.");
