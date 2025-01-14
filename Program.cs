@@ -121,10 +121,10 @@ internal class Program
     private static void DrawRose()
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(" \n   .-./\\_.-.");
+        Console.WriteLine(" \n    .-./\\_.-.");
         Console.WriteLine("   /         \\");
-        Console.WriteLine("  (            )");
-        Console.WriteLine("   \\          /");
+        Console.WriteLine("  (           )");
+        Console.WriteLine("   \\         /");
         Console.WriteLine("    `-\\'---'/`");
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("        | ");
@@ -235,12 +235,33 @@ internal class Program
         Console.Clear();
         Console.WriteLine("Podaj imię i nazwisko klienta:");
         string name = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Console.WriteLine("Imię i nazwisko nie mogą być puste.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
 
         Console.WriteLine("Podaj email klienta:");
         string email = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            Console.WriteLine("Email nie może być pusty.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
 
         Console.WriteLine("Podaj numer telefonu klienta:");
         string phone = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(phone))
+        {
+            Console.WriteLine("Numer telefonu nie może być pusty.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
 
         Customer newCustomer = new(name, email, phone);
         shop.AddCustomer(newCustomer);
