@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using ConsoleTables;
 
 internal class Program
 {
@@ -54,9 +55,12 @@ internal class Program
                     FulfillOrder(shop);
                     break;
                 case 7:
-                    SearchCustomerByEmail(shop);
+                    DisplayAllCustomers(shop);
                     break;
                 case 8:
+                    SearchCustomerByEmail(shop);
+                    break;
+                case 9:
                     return;
                 default:
                     Console.WriteLine("Nieprawidłowy wybór. Spróbuj ponownie.");
@@ -76,6 +80,7 @@ internal class Program
             "Dodaj nowego klienta",
             "Utwórz nowe zamówienie",
             "Zrealizuj zamówienie",
+            "Wyświetl wszystkich klientów",
             "Wyszukaj klienta po emailu",
             "Wyjdź"
         };
@@ -370,7 +375,32 @@ internal class Program
             Console.WriteLine(
                 $"Znaleziony klient: {customer.Name}, Email: {customer.Email}, Telefon: {customer.Phone}");
         else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Klient nie znaleziony.");
+            Console.ResetColor();
+        }
+
+        Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+        Console.ReadKey();
+    }
+
+    private static void DisplayAllCustomers(Shop shop)
+    {
+        Console.Clear();
+        if (shop.Customers.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Brak klientów.");
+            Console.ResetColor();
+        } else
+        {
+            ConsoleTable table = new("Imię i nazwisko", "Email", "Telefon");
+            foreach (Customer customer in shop.Customers)
+                table.AddRow(customer.Name, customer.Email, customer.Phone);
+            table.Write();
+        }
+
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
         Console.ReadKey();
     }
