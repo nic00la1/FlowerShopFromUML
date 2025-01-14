@@ -168,6 +168,13 @@ internal class Program
         Console.Clear();
         Console.WriteLine("Podaj nazwę bukietu:");
         string name = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Console.WriteLine("Nazwa bukietu nie może być pusta.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
 
         List<Flower> flowers = new();
         while (true)
@@ -176,21 +183,45 @@ internal class Program
                 "Podaj nazwę kwiatu (lub 'koniec' aby zakończyć):");
             string flowerName = Console.ReadLine();
             if (flowerName.ToLower() == "koniec") break;
+            if (string.IsNullOrWhiteSpace(flowerName))
+            {
+                Console.WriteLine("Nazwa kwiatu nie może być pusta.");
+                continue;
+            }
 
             Console.WriteLine("Podaj kolor kwiatu:");
             string color = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(color))
+            {
+                Console.WriteLine("Kolor kwiatu nie może być pusty.");
+                continue;
+            }
 
             Console.WriteLine("Podaj cenę kwiatu:");
-            float price = float.Parse(Console.ReadLine());
+            if (!float.TryParse(Console.ReadLine(), out float price))
+            {
+                Console.WriteLine("Nieprawidłowa cena.");
+                continue;
+            }
 
             Console.WriteLine("Podaj ilość kwiatu:");
-            int inStock = int.Parse(Console.ReadLine());
+            if (!int.TryParse(Console.ReadLine(), out int inStock))
+            {
+                Console.WriteLine("Nieprawidłowa ilość.");
+                continue;
+            }
 
             flowers.Add(new Flower(flowerName, color, price, inStock));
         }
 
         Console.WriteLine("Podaj cenę bukietu:");
-        float bouquetPrice = float.Parse(Console.ReadLine());
+        if (!float.TryParse(Console.ReadLine(), out float bouquetPrice))
+        {
+            Console.WriteLine("Nieprawidłowa cena bukietu.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
+        }
 
         shop.CreateBouquet(name, flowers, bouquetPrice);
         Console.WriteLine(
