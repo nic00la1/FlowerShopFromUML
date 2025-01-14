@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace FlowerShopFromUML;
 
-public class Customer
+public class FlowerCopy
 {
     public string Name { get; set; }
-    public string Email { get; set; }
-    public string Phone { get; set; }
+    public string Color { get; set; }
+    public int Count { get; set; }
 
-    public Customer(string name, string email, string phone)
+    public FlowerCopy(string name, string color, int count)
     {
         Name = name;
-        Email = email;
-        Phone = phone;
+        Color = color;
+        Count = count;
     }
 }

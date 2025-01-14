@@ -4,30 +4,107 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlowerShopFromUML
+namespace FlowerShopFromUML;
+
+public class Shop
 {
-    public class Shop
+    public string Name { get; set; }
+    public string Address { get; set; }
+    public List<Flower> Flowers { get; set; }
+    public List<Bouquet> Bouquets { get; set; }
+    public List<Order> Orders { get; set; }
+    public List<Customer> Customers { get; set; }
+
+    public Shop(string name,
+                string address,
+                List<Flower> flowers,
+                List<Bouquet> bouquets,
+                List<Order> orders,
+                List<Customer> customers
+    )
     {
-        public string Name { get; set; }
-        public string Adress { get; set; }
-        public List<Flower> Flowers { get; set; }
-        public List<Bouquet> Bouquets { get; set; }
-        public List<Order> Orders { get; set; }
+        Name = name;
+        Address = address;
+        Flowers = flowers;
+        Bouquets = bouquets;
+        Orders = orders;
+        Customers = customers;
+    }
 
-        public Shop() 
-        {
-            Flowers = new List<Flower>();
-            Bouquets = new List<Bouquet>();
-            Orders = new List<Order>();
-        }
+    public float CalculateTotalFlowerValue()
+    {
+        float totalValue = 0;
+        foreach (Flower flower in Flowers)
+            totalValue += flower.Price * flower.InStock;
+        return totalValue;
+    }
 
-        public Shop(string name, string adress, List<Flower> flowers, List<Bouquet> bouquets, List<Order> orders)
+    public float CalculateTotalBouquetValue()
+    {
+        float totalValue = 0;
+        foreach (Bouquet bouquet in Bouquets)
+            totalValue += bouquet.Price * bouquet.InStock;
+        return totalValue;
+    }
+
+    public void CreateBouquet(string name, List<Flower> flowers, float price)
+    {
+        Bouquet? existingBouquet = Bouquets.Find(b => b.Name == name);
+        if (existingBouquet != null)
         {
-            Name = name;
-            Adress = adress;
-            Flowers = flowers ?? new List<Flower>(); // Jesli nie ma kwiatkow to utworz nowa liste kwiatow
-            Bouquets = bouquets ?? new List<Bouquet>(); // -,,- 
-            Orders = orders ?? new List<Order>(); // -,,-
+            if (existingBouquet.Flowers.SequenceEqual(flowers))
+            {
+                existingBouquet.InStock++;
+                foreach (Flower flower in flowers)
+                {
+                    Flower? shopFlower =
+                        Flowers.Find(f => f.Name == flower.Name);
+                    if (shopFlower != null)
+                        shopFlower.InStock -= flower.InStock;
+                }
+            } else
+                throw new InvalidOperationException(
+                    "Bouquet with the same name but different content already exists.");
+        } else
+        {
+            Bouquets.Add(new Bouquet(name, flowers, price, 1));
+            foreach (Flower flower in flowers)
+            {
+                Flower? shopFlower = Flowers.Find(f => f.Name == flower.Name);
+                if (shopFlower != null)
+                    shopFlower.InStock -= flower.InStock;
+            }
         }
+    }
+
+    public void CreateOrder(Customer customer, List<Bouquet> bouquets)
+    {
+        float totalPrice = bouquets.Sum(b => b.Price);
+        Orders.Add(new Order(DateTime.Now, customer, bouquets, totalPrice));
+    }
+
+    public void FulfillOrder(Order order)
+    {
+        Orders.Remove(order);
+        foreach (Bouquet bouquet in order.Bouquets)
+        {
+            Bouquet? shopBouquet = Bouquets.Find(b => b.Name == bouquet.Name);
+            if (shopBouquet != null)
+            {
+                shopBouquet.InStock -= bouquet.InStock;
+                if (shopBouquet.InStock <= 0)
+                    Bouquets.Remove(shopBouquet);
+            }
+        }
+    }
+
+    public void AddCustomer(Customer customer)
+    {
+        Customers.Add(customer);
+    }
+
+    public Customer GetCustomerByEmail(string email)
+    {
+        return Customers.Find(c => c.Email == email);
     }
 }
