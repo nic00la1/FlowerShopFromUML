@@ -5,11 +5,17 @@ using ConsoleTables;
 
 public class ShopActions
 {
-    public void DisplayShopInfo(Shop shop)
+    private void DisplayTitle(string title)
     {
         Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"=== {title} ===");
+        Console.ResetColor();
+    }
 
-        Console.WriteLine("Informacje o sklepie: ");
+    public void DisplayShopInfo(Shop shop)
+    {
+        DisplayTitle("Informacje o sklepie");
 
         ConsoleTable table = new("W³aœciwoœæ", "Wartoœæ");
 
@@ -29,7 +35,7 @@ public class ShopActions
 
     public void AddNewBouquet(Shop shop, DatabaseManager dbManager)
     {
-        Console.Clear();
+        DisplayTitle("Dodawanie nowego bukietu");
         Console.WriteLine("Podaj nazwê bukietu:");
         string name = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(name))
@@ -108,7 +114,7 @@ public class ShopActions
 
     public void AddNewCustomer(Shop shop, DatabaseManager dbManager)
     {
-        Console.Clear();
+        DisplayTitle("Dodawanie nowego klienta");
         Console.WriteLine("Podaj imiê i nazwisko klienta:");
         string name = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(name))
@@ -150,7 +156,7 @@ public class ShopActions
 
     public void CreateNewOrder(Shop shop, DatabaseManager dbManager)
     {
-        Console.Clear();
+        DisplayTitle("Tworzenie nowego zamówienia");
         Console.WriteLine("Podaj email klienta:");
         string email = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(email))
@@ -200,7 +206,7 @@ public class ShopActions
 
     public void FulfillOrder(Shop shop, DatabaseManager dbManager)
     {
-        Console.Clear();
+        DisplayTitle("Realizacja zamówienia");
         Console.WriteLine("Podaj numer zamówienia do realizacji:");
         string input = Console.ReadLine();
         if (string.IsNullOrWhiteSpace(input) ||
@@ -230,7 +236,7 @@ public class ShopActions
 
     public void SearchCustomerByEmail(Shop shop)
     {
-        Console.Clear();
+        DisplayTitle("Wyszukiwanie klienta po emailu");
         Console.WriteLine("Podaj email klienta:");
         string email = Console.ReadLine();
         Customer customer = shop.GetCustomerByEmail(email);
@@ -250,14 +256,13 @@ public class ShopActions
 
     public void DisplayAllCustomers(Shop shop)
     {
-        Console.Clear();
+        DisplayTitle("Lista wszystkich klientów");
         if (shop.Customers.Count == 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Brak klientów.");
             Console.ResetColor();
-        }
-        else
+        } else
         {
             ConsoleTable table = new("Imiê i nazwisko", "Email", "Telefon");
             foreach (Customer customer in shop.Customers)
