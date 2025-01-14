@@ -87,7 +87,7 @@ internal class Program
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("*** Witaj w Kwiaciarni ***");
+            Console.WriteLine("*** Witaj w Kwiaciarni Nicoli ***");
             Console.ResetColor();
             Console.WriteLine("Wybierz akcję (użyj strzałek):\n");
 
@@ -179,10 +179,8 @@ internal class Program
         List<Flower> flowers = new();
         while (true)
         {
-            Console.WriteLine(
-                "Podaj nazwę kwiatu (lub 'koniec' aby zakończyć):");
+            Console.WriteLine("Podaj nazwę kwiatu:");
             string flowerName = Console.ReadLine();
-            if (flowerName.ToLower() == "koniec") break;
             if (string.IsNullOrWhiteSpace(flowerName))
             {
                 Console.WriteLine("Nazwa kwiatu nie może być pusta.");
@@ -212,6 +210,19 @@ internal class Program
             }
 
             flowers.Add(new Flower(flowerName, color, price, inStock));
+
+            Console.WriteLine(
+                "Czy chcesz dodać kolejny kwiat do bukietu? (tak/nie):");
+            string addMore = Console.ReadLine();
+            if (addMore.ToLower() != "tak") break;
+        }
+
+        if (flowers.Count == 0)
+        {
+            Console.WriteLine("Bukiet musi zawierać przynajmniej jeden kwiat.");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            return;
         }
 
         Console.WriteLine("Podaj cenę bukietu:");
