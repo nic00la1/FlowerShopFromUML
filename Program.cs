@@ -9,23 +9,19 @@ internal class Program
 {
     private static void Main()
     {
-        // Wczytywanie danych z pliku JSON
-        string jsonFilePath =
-            "C:\\Users\\Admin\\source\\repos\\nic00la1\\FlowerShopFromUML\\data.json";
-        string jsonData = File.ReadAllText(jsonFilePath);
+        // Tworzenie instancji DatabaseManager
+        DatabaseManager dbManager = new();
 
-        // Deserializacja danych
-        ShopData data = JsonSerializer.Deserialize<ShopData>(jsonData);
-
-        // Tworzenie sklepu na podstawie danych
+        // Wczytywanie danych z bazy danych
         Shop shop = new(
-            "Flower Shop",
-            "123 Flower St, Garden City",
-            data.Flowers,
-            data.Bouquets,
-            data.Orders,
-            data.Customers
+            "Fajna Kwiaciarnia Nicoli",
+            "Miasto Kwiatkowo, ul. Różowa 77",
+            new List<Flower>(),
+            new List<Bouquet>(),
+            new List<Order>(),
+            new List<Customer>()
         );
+        dbManager.LoadData(shop);
 
         // Pętla interaktywna
         while (true)
@@ -43,16 +39,16 @@ internal class Program
                     DisplayTotalBouquetValue(shop);
                     break;
                 case 3:
-                    AddNewBouquet(shop);
+                    AddNewBouquet(shop, dbManager);
                     break;
                 case 4:
-                    AddNewCustomer(shop);
+                    AddNewCustomer(shop, dbManager);
                     break;
                 case 5:
-                    CreateNewOrder(shop);
+                    CreateNewOrder(shop, dbManager);
                     break;
                 case 6:
-                    FulfillOrder(shop);
+                    FulfillOrder(shop, dbManager);
                     break;
                 case 7:
                     DisplayAllCustomers(shop);
@@ -61,6 +57,7 @@ internal class Program
                     SearchCustomerByEmail(shop);
                     break;
                 case 9:
+                    dbManager.SaveData(shop);
                     return;
                 default:
                     Console.WriteLine("Nieprawidłowy wybór. Spróbuj ponownie.");
@@ -168,7 +165,7 @@ internal class Program
         Console.ReadKey();
     }
 
-    private static void AddNewBouquet(Shop shop)
+    private static void AddNewBouquet(Shop shop, DatabaseManager dbManager)
     {
         Console.Clear();
         Console.WriteLine("Podaj nazwę bukietu:");
@@ -240,13 +237,14 @@ internal class Program
         }
 
         shop.CreateBouquet(name, flowers, bouquetPrice);
+        dbManager.SaveData(shop); // Save data to the database
         Console.WriteLine(
             $"Liczba bukietów po dodaniu nowego: {shop.Bouquets.Count}");
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
         Console.ReadKey();
     }
 
-    private static void AddNewCustomer(Shop shop)
+    private static void AddNewCustomer(Shop shop, DatabaseManager dbManager)
     {
         Console.Clear();
         Console.WriteLine("Podaj imię i nazwisko klienta:");
@@ -281,13 +279,14 @@ internal class Program
 
         Customer newCustomer = new(name, email, phone);
         shop.AddCustomer(newCustomer);
+        dbManager.SaveData(shop); // Save data to the database
         Console.WriteLine(
             $"Liczba klientów po dodaniu nowego: {shop.Customers.Count}");
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
         Console.ReadKey();
     }
 
-    private static void CreateNewOrder(Shop shop)
+    private static void CreateNewOrder(Shop shop, DatabaseManager dbManager)
     {
         Console.Clear();
         Console.WriteLine("Podaj email klienta:");
@@ -330,13 +329,14 @@ internal class Program
         }
 
         shop.CreateOrder(customer, orderBouquets);
+        dbManager.SaveData(shop); // Save data to the database
         Console.WriteLine(
             $"Liczba zamówień po dodaniu nowego: {shop.Orders.Count}");
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
         Console.ReadKey();
     }
 
-    private static void FulfillOrder(Shop shop)
+    private static void FulfillOrder(Shop shop, DatabaseManager dbManager)
     {
         Console.Clear();
         Console.WriteLine("Podaj numer zamówienia do realizacji:");
@@ -359,6 +359,7 @@ internal class Program
         }
 
         shop.FulfillOrder(shop.Orders[orderIndex]);
+        dbManager.SaveData(shop); // Save data to the database
         Console.WriteLine(
             $"Liczba zamówień po realizacji: {shop.Orders.Count}");
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
