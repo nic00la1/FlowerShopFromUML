@@ -33,30 +33,24 @@ internal class Program
                     DisplayShopInfo(shop);
                     break;
                 case 1:
-                    DisplayTotalFlowerValue(shop);
-                    break;
-                case 2:
-                    DisplayTotalBouquetValue(shop);
-                    break;
-                case 3:
                     AddNewBouquet(shop, dbManager);
                     break;
-                case 4:
+                case 2:
                     AddNewCustomer(shop, dbManager);
                     break;
-                case 5:
+                case 3:
                     CreateNewOrder(shop, dbManager);
                     break;
-                case 6:
+                case 4:
                     FulfillOrder(shop, dbManager);
                     break;
-                case 7:
+                case 5:
                     DisplayAllCustomers(shop);
                     break;
-                case 8:
+                case 6:
                     SearchCustomerByEmail(shop);
                     break;
-                case 9:
+                case 7:
                     dbManager.SaveData(shop);
                     return;
                 default:
@@ -71,8 +65,6 @@ internal class Program
         string[] options =
         {
             "Wyświetl informacje o sklepie",
-            "Wyświetl wartość wszystkich kwiatów",
-            "Wyświetl wartość wszystkich bukietów",
             "Dodaj nowy bukiet",
             "Dodaj nowego klienta",
             "Utwórz nowe zamówienie",
@@ -140,27 +132,21 @@ internal class Program
     private static void DisplayShopInfo(Shop shop)
     {
         Console.Clear();
-        Console.WriteLine($"Sklep: {shop.Name}, Adres: {shop.Address}");
-        Console.WriteLine($"Liczba kwiatów: {shop.Flowers.Count}");
-        Console.WriteLine($"Liczba bukietów: {shop.Bouquets.Count}");
-        Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
-        Console.ReadKey();
-    }
 
-    private static void DisplayTotalFlowerValue(Shop shop)
-    {
-        Console.Clear();
-        float totalFlowerValue = shop.CalculateTotalFlowerValue();
-        Console.WriteLine($"Całkowita wartość kwiatów: {totalFlowerValue}");
-        Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
-        Console.ReadKey();
-    }
+        Console.WriteLine("Informacje o sklepie: ");
 
-    private static void DisplayTotalBouquetValue(Shop shop)
-    {
-        Console.Clear();
-        float totalBouquetValue = shop.CalculateTotalBouquetValue();
-        Console.WriteLine($"Całkowita wartość bukietów: {totalBouquetValue}");
+        ConsoleTable table = new("Właściwość", "Wartość");
+
+        table.AddRow("Nazwa", shop.Name)
+            .AddRow("Adres", shop.Address)
+            .AddRow("Całkowita wartość kwiatów",
+                shop.CalculateTotalFlowerValue())
+            .AddRow("Całkowita wartość bukietów",
+                shop.CalculateTotalBouquetValue())
+            .AddRow("Liczba zamówień", shop.Orders.Count)
+            .AddRow("Liczba klientów", shop.Customers.Count);
+
+        table.Write();
         Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
         Console.ReadKey();
     }
