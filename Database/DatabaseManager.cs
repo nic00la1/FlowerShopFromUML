@@ -164,7 +164,7 @@ public class DatabaseManager
                 while (reader.Read())
                     shop.Bouquets.Add(new Bouquet(
                         reader.GetString(0),
-                        new List<Flower>(), // Flowers will be loaded later
+                        new List<FlowerCopy>(), // Flowers will be loaded later
                         reader.GetFloat(1),
                         reader.GetInt32(2)
                     ));

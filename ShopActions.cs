@@ -60,9 +60,9 @@ public class ShopActions
         table.AddRow("Nazwa", shop.Name)
             .AddRow("Adres", shop.Address)
             .AddRow("Ca³kowita wartoœæ kwiatów",
-                shop.CalculateTotalFlowerValue())
+                $"{shop.CalculateTotalFlowerValue()} z³")
             .AddRow("Ca³kowita wartoœæ bukietów",
-                shop.CalculateTotalBouquetValue())
+                $"{shop.CalculateTotalBouquetValue()} z³")
             .AddRow("Liczba zamówieñ", shop.Orders.Count)
             .AddRow("Liczba klientów", shop.Customers.Count);
 
@@ -109,7 +109,10 @@ public class ShopActions
         float bouquetPrice = GetValidatedInput("Podaj cenê bukietu:",
             input => (float.TryParse(input, out float result), result));
 
-        shop.CreateBouquet(name, flowers, bouquetPrice);
+        List<FlowerCopy> flowerCopies = flowers
+            .Select(f => new FlowerCopy(f.Name, f.Color, f.InStock)).ToList();
+
+        shop.CreateBouquet(name, flowerCopies, bouquetPrice);
         dbManager.SaveData(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba bukietów po dodaniu nowego: {shop.Bouquets.Count}");
@@ -219,9 +222,56 @@ public class ShopActions
             Console.ResetColor();
         } else
         {
-            ConsoleTable table = new("Imiê i nazwisko", "Email", "Telefon");
+            ConsoleTable table = new("Nr", "Imiê i nazwisko", "Email",
+                "Telefon");
+            int index = 1;
             foreach (Customer customer in shop.Customers)
-                table.AddRow(customer.Name, customer.Email, customer.Phone);
+                table.AddRow(index++, customer.Name, customer.Email,
+                    customer.Phone);
+            table.Write();
+        }
+
+        DisplayMessageAndWait("");
+    }
+
+    public void DisplayAllBouquets(Shop shop)
+    {
+        DisplayTitle("Lista wszystkich bukietów");
+        if (shop.Bouquets.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Brak bukietów.");
+            Console.ResetColor();
+        } else
+        {
+            ConsoleTable table = new("Nr", "Nazwa", "Cena [z³]",
+                "Iloœæ w magazynie");
+            int index = 1;
+            foreach (Bouquet bouquet in shop.Bouquets)
+                table.AddRow(index++, bouquet.Name, bouquet.Price,
+                    bouquet.InStock);
+            table.Write();
+        }
+
+        DisplayMessageAndWait("");
+    }
+
+    public void DisplayAllFlowers(Shop shop)
+    {
+        DisplayTitle("Lista wszystkich kwiatów");
+        if (shop.Flowers.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Brak kwiatów.");
+            Console.ResetColor();
+        } else
+        {
+            ConsoleTable table = new("Nr", "Nazwa", "Kolor", "Cena [z³]",
+                "Iloœæ w magazynie");
+            int index = 1;
+            foreach (Flower flower in shop.Flowers)
+                table.AddRow(index++, flower.Name, flower.Color, flower.Price,
+                    flower.InStock);
             table.Write();
         }
 

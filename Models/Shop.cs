@@ -47,7 +47,10 @@ public class Shop
         return totalValue;
     }
 
-    public void CreateBouquet(string name, List<Flower> flowers, float price)
+    public void CreateBouquet(string name,
+                              List<FlowerCopy> flowers,
+                              float price
+    )
     {
         Bouquet? existingBouquet = Bouquets.Find(b => b.Name == name);
         if (existingBouquet != null)
@@ -55,12 +58,12 @@ public class Shop
             if (existingBouquet.Flowers.SequenceEqual(flowers))
             {
                 existingBouquet.InStock++;
-                foreach (Flower flower in flowers)
+                foreach (FlowerCopy flower in flowers)
                 {
-                    Flower? shopFlower =
-                        Flowers.Find(f => f.Name == flower.Name);
+                    Flower? shopFlower = Flowers.Find(f =>
+                        f.Name == flower.Name && f.Color == flower.Color);
                     if (shopFlower != null)
-                        shopFlower.InStock -= flower.InStock;
+                        shopFlower.InStock -= flower.Count;
                 }
             } else
                 throw new InvalidOperationException(
@@ -68,11 +71,12 @@ public class Shop
         } else
         {
             Bouquets.Add(new Bouquet(name, flowers, price, 1));
-            foreach (Flower flower in flowers)
+            foreach (FlowerCopy flower in flowers)
             {
-                Flower? shopFlower = Flowers.Find(f => f.Name == flower.Name);
+                Flower? shopFlower = Flowers.Find(f =>
+                    f.Name == flower.Name && f.Color == flower.Color);
                 if (shopFlower != null)
-                    shopFlower.InStock -= flower.InStock;
+                    shopFlower.InStock -= flower.Count;
             }
         }
     }

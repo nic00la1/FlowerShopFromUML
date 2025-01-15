@@ -18,4 +18,17 @@ public class FlowerCopy
         Color = color;
         Count = count;
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is FlowerCopy other)
+            return Name == other.Name && Color == other.Color &&
+                Count == other.Count;
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Color, Count);
+    }
 }

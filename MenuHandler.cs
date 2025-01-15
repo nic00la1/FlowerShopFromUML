@@ -14,6 +14,8 @@ public class MenuHandler
             "Zrealizuj zamówienie",
             "Wyœwietl wszystkich klientów",
             "Wyszukaj klienta po emailu",
+            "Wyœwietl wszystkie bukiety",
+            "Wyœwietl wszystkie kwiaty",
             "WyjdŸ"
         };
 
@@ -33,10 +35,9 @@ public class MenuHandler
                 {
                     Console.ForegroundColor = ConsoleColor.White;
                     Console.BackgroundColor = ConsoleColor.Green;
-                    Console.WriteLine($">> {options[i]} <<");
+                    Console.WriteLine($">> {options[i]} <<\n");
                     Console.ResetColor();
-                }
-                else
+                } else
                     Console.WriteLine($"   {options[i]}");
 
             DrawRose();
