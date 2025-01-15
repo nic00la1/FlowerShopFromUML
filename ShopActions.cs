@@ -193,9 +193,13 @@ public class ShopActions
         Customer customer = shop.Customers.Find(c =>
             c.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         if (customer != null)
-            Console.WriteLine(
-                $"Znaleziony klient: {customer.Name}, Email: {customer.Email}, Telefon: {customer.Phone}");
-        else
+        {
+            Console.Write($"Znaleziony klient: {customer.Name}, Email: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(customer.Email);
+            Console.ResetColor();
+            Console.WriteLine($", Telefon: {customer.Phone}");
+        } else
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Klient nie znaleziony.");
