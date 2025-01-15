@@ -153,7 +153,8 @@ public class ShopActions
                 continue;
             }
 
-            Bouquet bouquet = shop.Bouquets.Find(b => b.Name == bouquetName);
+            Bouquet bouquet = shop.Bouquets.Find(b =>
+                b.Name.Equals(bouquetName, StringComparison.OrdinalIgnoreCase));
             if (bouquet != null)
                 orderBouquets.Add(bouquet);
             else
@@ -189,7 +190,8 @@ public class ShopActions
     {
         DisplayTitle("Wyszukiwanie klienta po emailu");
         string email = GetInput("Podaj email klienta:");
-        Customer customer = shop.GetCustomerByEmail(email);
+        Customer customer = shop.Customers.Find(c =>
+            c.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         if (customer != null)
             Console.WriteLine(
                 $"Znaleziony klient: {customer.Name}, Email: {customer.Email}, Telefon: {customer.Phone}");
