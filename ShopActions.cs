@@ -74,9 +74,14 @@ public class ShopActions
         DisplayMessageAndWait("");
     }
 
-    private int DisplayMenu(string title, List<string> options)
+    private int DisplayMenu(string title,
+                            List<string> options,
+                            int pageSize = 10
+    )
     {
         int selectedIndex = 0;
+        int currentPage = 0;
+        int totalPages = (int)Math.Ceiling((double)options.Count / pageSize);
         ConsoleKey key;
 
         do
@@ -84,7 +89,10 @@ public class ShopActions
             Console.Clear();
             DisplayTitle(title);
 
-            for (int i = 0; i < options.Count; i++)
+            int start = currentPage * pageSize;
+            int end = Math.Min(start + pageSize, options.Count);
+
+            for (int i = start; i < end; i++)
                 if (i == selectedIndex)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -93,16 +101,30 @@ public class ShopActions
                 } else
                     Console.WriteLine($"  {options[i]}");
 
+            Console.WriteLine($"\nPage {currentPage + 1} of {totalPages}");
+
             key = Console.ReadKey().Key;
 
             if (key == ConsoleKey.UpArrow)
-                selectedIndex = selectedIndex == 0
-                    ? options.Count - 1
+                selectedIndex = selectedIndex == start
+                    ? end - 1
                     : selectedIndex - 1;
             else if (key == ConsoleKey.DownArrow)
-                selectedIndex = selectedIndex == options.Count - 1
-                    ? 0
+                selectedIndex = selectedIndex == end - 1
+                    ? start
                     : selectedIndex + 1;
+            else if (key == ConsoleKey.LeftArrow)
+            {
+                currentPage =
+                    currentPage == 0 ? totalPages - 1 : currentPage - 1;
+                selectedIndex = currentPage * pageSize;
+            } else if (key == ConsoleKey.RightArrow)
+            {
+                currentPage = currentPage == totalPages - 1
+                    ? 0
+                    : currentPage + 1;
+                selectedIndex = currentPage * pageSize;
+            }
         } while (key != ConsoleKey.Enter);
 
         return selectedIndex;
@@ -314,7 +336,7 @@ public class ShopActions
         DisplayMessageAndWait("");
     }
 
-    public void DisplayAllBouquets(Shop shop)
+    public void DisplayAllBouquets(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Lista wszystkich bukietów");
         if (shop.Bouquets.Count == 0)
@@ -325,11 +347,17 @@ public class ShopActions
         } else
         {
             ConsoleTable table = new("Nr", "Nazwa", "Cena [z³]",
-                "Iloœæ w magazynie");
+                "Iloœæ w magazynie", "Kwiaty");
             int index = 1;
             foreach (Bouquet bouquet in shop.Bouquets)
+            {
+                string flowers = string.Join(", ",
+                    bouquet.Flowers.Select(f =>
+                        $"{f.Name} ({f.Color}) x{f.Count}"));
                 table.AddRow(index++, bouquet.Name, bouquet.Price,
-                    bouquet.InStock);
+                    bouquet.InStock, flowers);
+            }
+
             table.Write();
         }
 

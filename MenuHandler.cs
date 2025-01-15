@@ -162,7 +162,7 @@ public class MenuHandler
                 _shopActions.SearchCustomerByEmail(_shop);
                 break;
             case 7:
-                _shopActions.DisplayAllBouquets(_shop);
+                _shopActions.DisplayAllBouquets(_shop, _dbManager);
                 break;
             case 8:
                 _shopActions.DisplayAllFlowers(_shop);

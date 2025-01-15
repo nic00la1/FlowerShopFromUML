@@ -114,7 +114,7 @@ internal class Program
                     shopActions.SearchCustomerByEmail(shop);
                     break;
                 case 7:
-                    shopActions.DisplayAllBouquets(shop);
+                    shopActions.DisplayAllBouquets(shop, dbManager);
                     break;
                 case 8:
                     shopActions.DisplayAllFlowers(shop);

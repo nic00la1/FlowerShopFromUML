@@ -227,4 +227,28 @@ public class DatabaseManager
             Console.WriteLine($"Wyst¹pi³ b³¹d: {ex.Message}");
         }
     }
+
+    public void RemoveEmptyBouquetsFromDatabase()
+    {
+        try
+        {
+            using SqliteConnection connection = new(ConnectionString);
+            connection.Open();
+
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = @"
+                DELETE FROM Bouquets
+                WHERE Name NOT IN (
+                    SELECT DISTINCT BouquetName
+                    FROM OrderBouquets
+                );
+            ";
+            int rowsAffected = command.ExecuteNonQuery();
+            Console.WriteLine($"Usuniêto {rowsAffected} pustych bukietów.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Wyst¹pi³ b³¹d: {ex.Message}");
+        }
+    }
 }
