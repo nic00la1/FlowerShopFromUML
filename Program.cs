@@ -11,7 +11,6 @@ internal class Program
     {
         // Tworzenie instancji DatabaseManager
         DatabaseManager dbManager = new();
-        MenuHandler menuHandler = new();
         ShopActions shopActions = new();
 
         // Wczytywanie danych z bazy danych
@@ -83,6 +82,9 @@ internal class Program
         shop.Orders.AddRange(orders);
         shop.Customers.AddRange(new List<Customer>
             { customer1, customer2, customer3 });
+
+        // Tworzenie instancji MenuHandler
+        MenuHandler menuHandler = new(shopActions, shop, dbManager);
 
         // Pętla interaktywna
         while (true)

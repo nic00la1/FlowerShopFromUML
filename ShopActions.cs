@@ -13,9 +13,13 @@ public class ShopActions
         Console.ResetColor();
     }
 
-    private void DisplayMessageAndWait(string message)
+    private void DisplayMessageAndWait(string message,
+                                       ConsoleColor color = ConsoleColor.White
+    )
     {
+        Console.ForegroundColor = color;
         Console.WriteLine(message);
+        Console.ResetColor();
         Console.WriteLine("Naciœnij dowolny klawisz, aby kontynuowaæ...");
         Console.ReadKey();
     }
@@ -76,7 +80,8 @@ public class ShopActions
         string name = GetInput("Podaj nazwê bukietu:");
         if (string.IsNullOrWhiteSpace(name))
         {
-            DisplayMessageAndWait("Nazwa bukietu nie mo¿e byæ pusta.");
+            DisplayMessageAndWait("Nazwa bukietu nie mo¿e byæ pusta.",
+                ConsoleColor.Red);
             return;
         }
 
@@ -102,7 +107,8 @@ public class ShopActions
         if (flowers.Count == 0)
         {
             DisplayMessageAndWait(
-                "Bukiet musi zawieraæ przynajmniej jeden kwiat.");
+                "Bukiet musi zawieraæ przynajmniej jeden kwiat.",
+                ConsoleColor.Red);
             return;
         }
 
@@ -112,7 +118,13 @@ public class ShopActions
         List<FlowerCopy> flowerCopies = flowers
             .Select(f => new FlowerCopy(f.Name, f.Color, f.InStock)).ToList();
 
-        shop.CreateBouquet(name, flowerCopies, bouquetPrice);
+        if (!shop.CreateBouquet(name, flowerCopies, bouquetPrice,
+                out string errorMessage))
+        {
+            DisplayMessageAndWait(errorMessage, ConsoleColor.Red);
+            return;
+        }
+
         dbManager.SaveData(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba bukietów po dodaniu nowego: {shop.Bouquets.Count}");
@@ -139,7 +151,7 @@ public class ShopActions
         Customer customer = shop.GetCustomerByEmail(email);
         if (customer == null)
         {
-            DisplayMessageAndWait("Klient nie znaleziony.");
+            DisplayMessageAndWait("Klient nie znaleziony.", ConsoleColor.Red);
             return;
         }
 
@@ -179,7 +191,8 @@ public class ShopActions
 
         if (orderIndex < 0 || orderIndex >= shop.Orders.Count)
         {
-            DisplayMessageAndWait("Nieprawid³owy numer zamówienia.");
+            DisplayMessageAndWait("Nieprawid³owy numer zamówienia.",
+                ConsoleColor.Red);
             return;
         }
 

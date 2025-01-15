@@ -47,11 +47,13 @@ public class Shop
         return totalValue;
     }
 
-    public void CreateBouquet(string name,
+    public bool CreateBouquet(string name,
                               List<FlowerCopy> flowers,
-                              float price
+                              float price,
+                              out string errorMessage
     )
     {
+        errorMessage = string.Empty;
         Bouquet? existingBouquet = Bouquets.Find(b => b.Name == name);
         if (existingBouquet != null)
         {
@@ -66,8 +68,11 @@ public class Shop
                         shopFlower.InStock -= flower.Count;
                 }
             } else
-                throw new InvalidOperationException(
-                    "Bouquet with the same name but different content already exists.");
+            {
+                errorMessage =
+                    "Bukiet o tej samej nazwie, ale innej zawartości już istnieje.";
+                return false;
+            }
         } else
         {
             Bouquets.Add(new Bouquet(name, flowers, price, 1));
@@ -79,6 +84,8 @@ public class Shop
                     shopFlower.InStock -= flower.Count;
             }
         }
+
+        return true;
     }
 
     public void CreateOrder(Customer customer, List<Bouquet> bouquets)

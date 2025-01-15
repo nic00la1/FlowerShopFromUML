@@ -1,32 +1,111 @@
 using System;
 using System.Collections.Generic;
+using FlowerShopFromUML;
 
 public class MenuHandler
 {
+    private readonly ShopActions _shopActions;
+    private readonly Shop _shop;
+    private readonly DatabaseManager _dbManager;
+
+    public MenuHandler(ShopActions shopActions,
+                       Shop shop,
+                       DatabaseManager dbManager
+    )
+    {
+        _shopActions = shopActions;
+        _shop = shop;
+        _dbManager = dbManager;
+    }
+
     public int DisplayMenu()
     {
-        string[] options =
+        string[] mainOptions =
         {
             "Wyœwietl informacje o sklepie",
-            "Dodaj nowy bukiet",
-            "Dodaj nowego klienta",
-            "Utwórz nowe zamówienie",
-            "Zrealizuj zamówienie",
-            "Wyœwietl wszystkich klientów",
-            "Wyszukaj klienta po emailu",
-            "Wyœwietl wszystkie bukiety",
-            "Wyœwietl wszystkie kwiaty",
+            "Opcje bukietów",
+            "Opcje klientów",
             "WyjdŸ"
         };
 
-        int selectedIndex = 0;
+        string[] bouquetOptions =
+        {
+            "Dodaj nowy bukiet",
+            "Wyœwietl wszystkie bukiety",
+            "Powrót do g³ównego menu"
+        };
 
+        string[] customerOptions =
+        {
+            "Dodaj nowego klienta",
+            "Wyœwietl wszystkich klientów",
+            "Wyszukaj klienta po emailu",
+            "Powrót do g³ównego menu"
+        };
+
+        while (true)
+        {
+            int selectedIndex = DisplayOptions(mainOptions,
+                "*** Witaj w Kwiaciarni Nicoli ***");
+
+            switch (selectedIndex)
+            {
+                case 0:
+                    return 0; // Wyœwietl informacje o sklepie
+                case 1:
+                    DisplaySubMenu(bouquetOptions, "Opcje bukietów");
+                    break;
+                case 2:
+                    DisplaySubMenu(customerOptions, "Opcje klientów");
+                    break;
+                case 3:
+                    return 9; // WyjdŸ
+                default:
+                    Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");
+                    break;
+            }
+        }
+    }
+
+    private void DisplaySubMenu(string[] options, string title)
+    {
+        while (true)
+        {
+            int selectedIndex = DisplayOptions(options, title);
+
+            if (selectedIndex == options.Length - 1)
+                break; // Powrót do g³ównego menu
+
+            switch (title)
+            {
+                case "Opcje bukietów":
+                    if (selectedIndex == 0)
+                        ExecuteAction(1); // Dodaj nowy bukiet
+                    if (selectedIndex == 1)
+                        ExecuteAction(7); // Wyœwietl wszystkie bukiety
+                    break;
+                case "Opcje klientów":
+                    if (selectedIndex == 0)
+                        ExecuteAction(2); // Dodaj nowego klienta
+                    if (selectedIndex == 1)
+                        ExecuteAction(5); // Wyœwietl wszystkich klientów
+                    if (selectedIndex == 2)
+                        ExecuteAction(6); // Wyszukaj klienta po emailu
+                    break;
+            }
+        }
+    }
+
+    private int DisplayOptions(string[] options, string title)
+    {
+        int selectedIndex = 0;
         ConsoleKey key;
+
         do
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("*** Witaj w Kwiaciarni Nicoli ***");
+            Console.WriteLine(title);
             Console.ResetColor();
             Console.WriteLine("Wybierz akcjê (u¿yj strza³ek):\n");
 
@@ -55,6 +134,46 @@ public class MenuHandler
         } while (key != ConsoleKey.Enter);
 
         return selectedIndex;
+    }
+
+    private void ExecuteAction(int action)
+    {
+        switch (action)
+        {
+            case 0:
+                _shopActions.DisplayShopInfo(_shop);
+                break;
+            case 1:
+                _shopActions.AddNewBouquet(_shop, _dbManager);
+                break;
+            case 2:
+                _shopActions.AddNewCustomer(_shop, _dbManager);
+                break;
+            case 3:
+                _shopActions.CreateNewOrder(_shop, _dbManager);
+                break;
+            case 4:
+                _shopActions.FulfillOrder(_shop, _dbManager);
+                break;
+            case 5:
+                _shopActions.DisplayAllCustomers(_shop);
+                break;
+            case 6:
+                _shopActions.SearchCustomerByEmail(_shop);
+                break;
+            case 7:
+                _shopActions.DisplayAllBouquets(_shop);
+                break;
+            case 8:
+                _shopActions.DisplayAllFlowers(_shop);
+                break;
+            case 9:
+                _dbManager.SaveData(_shop);
+                break;
+            default:
+                Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");
+                break;
+        }
     }
 
     private void DrawRose()
