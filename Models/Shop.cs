@@ -102,7 +102,7 @@ public class Shop
             Bouquet? shopBouquet = Bouquets.Find(b => b.Name == bouquet.Name);
             if (shopBouquet != null)
             {
-                shopBouquet.InStock -= bouquet.InStock;
+                shopBouquet.InStock--;
                 if (shopBouquet.InStock <= 0)
                     Bouquets.Remove(shopBouquet);
             }

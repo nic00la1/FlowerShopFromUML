@@ -74,10 +74,61 @@ public class ShopActions
         DisplayMessageAndWait("");
     }
 
+    private int DisplayMenu(string title, List<string> options)
+    {
+        int selectedIndex = 0;
+        ConsoleKey key;
+
+        do
+        {
+            Console.Clear();
+            DisplayTitle(title);
+
+            for (int i = 0; i < options.Count; i++)
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"> {options[i]}");
+                    Console.ResetColor();
+                } else
+                    Console.WriteLine($"  {options[i]}");
+
+            key = Console.ReadKey().Key;
+
+            if (key == ConsoleKey.UpArrow)
+                selectedIndex = selectedIndex == 0
+                    ? options.Count - 1
+                    : selectedIndex - 1;
+            else if (key == ConsoleKey.DownArrow)
+                selectedIndex = selectedIndex == options.Count - 1
+                    ? 0
+                    : selectedIndex + 1;
+        } while (key != ConsoleKey.Enter);
+
+        return selectedIndex;
+    }
+
     public void AddNewBouquet(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Dodawanie nowego bukietu");
-        string name = GetInput("Podaj nazwê bukietu:");
+
+        // Prepare options for the menu
+        List<string> bouquetOptions = new();
+        foreach (Bouquet bouquet in shop.Bouquets)
+            bouquetOptions.Add(
+                $"{bouquet.Name} - {bouquet.Price} z³, {bouquet.InStock} w magazynie");
+        bouquetOptions.Add("Wpisz nowy bukiet");
+
+        // Display menu and get selected index
+        int selectedBouquetIndex = DisplayMenu("Wybierz bukiet lub wpisz nowy",
+            bouquetOptions);
+
+        string name;
+        if (selectedBouquetIndex == shop.Bouquets.Count)
+            name = GetInput("Podaj nazwê nowego bukietu:");
+        else
+            name = shop.Bouquets[selectedBouquetIndex].Name;
+
         if (string.IsNullOrWhiteSpace(name))
         {
             DisplayMessageAndWait("Nazwa bukietu nie mo¿e byæ pusta.",
@@ -85,17 +136,35 @@ public class ShopActions
             return;
         }
 
-        List<Flower> flowers = new();
+        List<FlowerCopy> flowerCopies = new();
         while (true)
         {
-            string flowerName = GetInput("Podaj nazwê kwiatu:");
-            string color = GetInput("Podaj kolor kwiatu:");
-            float price = GetValidatedInput("Podaj cenê kwiatu:",
-                input => (float.TryParse(input, out float result), result));
-            int inStock = GetValidatedInput("Podaj iloœæ kwiatu:",
-                input => (int.TryParse(input, out int result), result));
+            // Prepare options for the flower menu
+            List<string> flowerOptions = new();
+            foreach (Flower flower in shop.Flowers)
+                flowerOptions.Add(
+                    $"{flower.Name} ({flower.Color}) - {flower.Price} z³, {flower.InStock} w magazynie");
+            flowerOptions.Add("Zakoñcz wybieranie kwiatów");
 
-            flowers.Add(new Flower(flowerName, color, price, inStock));
+            // Display flower menu and get selected index
+            int selectedFlowerIndex = DisplayMenu(
+                "Wybierz kwiat z listy (lub zakoñcz wybieranie)",
+                flowerOptions);
+
+            if (selectedFlowerIndex == shop.Flowers.Count) break;
+
+            Flower selectedFlower = shop.Flowers[selectedFlowerIndex];
+            int count = GetValidatedInput(
+                $"Podaj iloœæ kwiatu '{selectedFlower.Name}' ({selectedFlower.Color}):",
+                input =>
+                {
+                    bool isValid = int.TryParse(input, out int result) &&
+                        result > 0 && result <= selectedFlower.InStock;
+                    return (isValid, result);
+                });
+
+            flowerCopies.Add(new FlowerCopy(selectedFlower.Name,
+                selectedFlower.Color, count));
 
             string addMore =
                 GetInput(
@@ -104,7 +173,7 @@ public class ShopActions
             if (addMore.ToLower() != "tak") break;
         }
 
-        if (flowers.Count == 0)
+        if (flowerCopies.Count == 0)
         {
             DisplayMessageAndWait(
                 "Bukiet musi zawieraæ przynajmniej jeden kwiat.",
@@ -114,9 +183,6 @@ public class ShopActions
 
         float bouquetPrice = GetValidatedInput("Podaj cenê bukietu:",
             input => (float.TryParse(input, out float result), result));
-
-        List<FlowerCopy> flowerCopies = flowers
-            .Select(f => new FlowerCopy(f.Name, f.Color, f.InStock)).ToList();
 
         if (!shop.CreateBouquet(name, flowerCopies, bouquetPrice,
                 out string errorMessage))
@@ -129,6 +195,7 @@ public class ShopActions
         DisplayMessageAndWait(
             $"Liczba bukietów po dodaniu nowego: {shop.Bouquets.Count}");
     }
+
 
     public void AddNewCustomer(Shop shop, DatabaseManager dbManager)
     {
