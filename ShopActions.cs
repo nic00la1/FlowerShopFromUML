@@ -101,29 +101,58 @@ public class ShopActions
                 } else
                     Console.WriteLine($"  {options[i]}");
 
-            Console.WriteLine($"\nPage {currentPage + 1} of {totalPages}");
+            Console.WriteLine($"\nStrona {currentPage + 1} z {totalPages}");
 
             key = Console.ReadKey().Key;
 
             if (key == ConsoleKey.UpArrow)
-                selectedIndex = selectedIndex == start
-                    ? end - 1
-                    : selectedIndex - 1;
-            else if (key == ConsoleKey.DownArrow)
-                selectedIndex = selectedIndex == end - 1
-                    ? start
-                    : selectedIndex + 1;
-            else if (key == ConsoleKey.LeftArrow)
             {
-                currentPage =
-                    currentPage == 0 ? totalPages - 1 : currentPage - 1;
-                selectedIndex = currentPage * pageSize;
+                if (selectedIndex > start)
+                    selectedIndex--;
+                else if (currentPage > 0)
+                {
+                    currentPage--;
+                    selectedIndex = currentPage * pageSize + pageSize - 1;
+                } else
+                {
+                    currentPage = totalPages - 1;
+                    selectedIndex = options.Count - 1;
+                }
+            } else if (key == ConsoleKey.DownArrow)
+            {
+                if (selectedIndex < end - 1)
+                    selectedIndex++;
+                else if (currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    selectedIndex = currentPage * pageSize;
+                } else
+                {
+                    currentPage = 0;
+                    selectedIndex = 0;
+                }
+            } else if (key == ConsoleKey.LeftArrow)
+            {
+                if (currentPage > 0)
+                {
+                    currentPage--;
+                    selectedIndex = currentPage * pageSize;
+                } else
+                {
+                    currentPage = totalPages - 1;
+                    selectedIndex = currentPage * pageSize;
+                }
             } else if (key == ConsoleKey.RightArrow)
             {
-                currentPage = currentPage == totalPages - 1
-                    ? 0
-                    : currentPage + 1;
-                selectedIndex = currentPage * pageSize;
+                if (currentPage < totalPages - 1)
+                {
+                    currentPage++;
+                    selectedIndex = currentPage * pageSize;
+                } else
+                {
+                    currentPage = 0;
+                    selectedIndex = 0;
+                }
             }
         } while (key != ConsoleKey.Enter);
 
@@ -137,8 +166,14 @@ public class ShopActions
         // Prepare options for the menu
         List<string> bouquetOptions = new();
         foreach (Bouquet bouquet in shop.Bouquets)
+        {
+            string flowers = string.Join(", ",
+                bouquet.Flowers.Select(f =>
+                    $"{f.Name} ({f.Color}) x{f.Count}"));
             bouquetOptions.Add(
-                $"{bouquet.Name} - {bouquet.Price} z³, {bouquet.InStock} w magazynie");
+                $"{bouquet.Name} - {bouquet.Price} z³, {bouquet.InStock} w magazynie - {flowers}");
+        }
+
         bouquetOptions.Add("Wpisz nowy bukiet");
 
         // Display menu and get selected index
