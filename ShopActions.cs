@@ -159,7 +159,7 @@ public class ShopActions
         return selectedIndex;
     }
 
-    public void AddNewBouquet(Shop shop, DatabaseManager dbManager)
+    public async Task AddNewBouquetAsync(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Dodawanie nowego bukietu");
 
@@ -248,13 +248,12 @@ public class ShopActions
             return;
         }
 
-        dbManager.SaveData(shop); // Save data to the database
+        await dbManager.SaveDataAsync(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba bukietów po dodaniu nowego: {shop.Bouquets.Count}");
     }
 
-
-    public void AddNewCustomer(Shop shop, DatabaseManager dbManager)
+    public async Task AddNewCustomerAsync(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Dodawanie nowego klienta");
         string name = GetInput("Podaj imiê i nazwisko klienta:");
@@ -263,12 +262,12 @@ public class ShopActions
 
         Customer newCustomer = new(name, email, phone);
         shop.AddCustomer(newCustomer);
-        dbManager.SaveData(shop); // Save data to the database
+        await dbManager.SaveDataAsync(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba klientów po dodaniu nowego: {shop.Customers.Count}");
     }
 
-    public void CreateNewOrder(Shop shop, DatabaseManager dbManager)
+    public async Task CreateNewOrderAsync(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Tworzenie nowego zamówienia");
         string email = GetInput("Podaj email klienta:");
@@ -301,12 +300,12 @@ public class ShopActions
         }
 
         shop.CreateOrder(customer, orderBouquets);
-        dbManager.SaveData(shop); // Save data to the database
+        await dbManager.SaveDataAsync(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba zamówieñ po dodaniu nowego: {shop.Orders.Count}");
     }
 
-    public void FulfillOrder(Shop shop, DatabaseManager dbManager)
+    public async Task FulfillOrderAsync(Shop shop, DatabaseManager dbManager)
     {
         DisplayTitle("Realizacja zamówienia");
         int orderIndex = GetValidatedInput(
@@ -321,7 +320,7 @@ public class ShopActions
         }
 
         shop.FulfillOrder(shop.Orders[orderIndex]);
-        dbManager.SaveData(shop); // Save data to the database
+        await dbManager.SaveDataAsync(shop); // Save data to the database
         DisplayMessageAndWait(
             $"Liczba zamówieñ po realizacji: {shop.Orders.Count}");
     }

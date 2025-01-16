@@ -80,17 +80,20 @@ public class MenuHandler
             {
                 case "Opcje bukietów":
                     if (selectedIndex == 0)
-                        ExecuteAction(1); // Dodaj nowy bukiet
+                        ExecuteActionAsync(1).Wait(); // Dodaj nowy bukiet
                     if (selectedIndex == 1)
-                        ExecuteAction(7); // Wyœwietl wszystkie bukiety
+                        ExecuteActionAsync(7)
+                            .Wait(); // Wyœwietl wszystkie bukiety
                     break;
                 case "Opcje klientów":
                     if (selectedIndex == 0)
-                        ExecuteAction(2); // Dodaj nowego klienta
+                        ExecuteActionAsync(2).Wait(); // Dodaj nowego klienta
                     if (selectedIndex == 1)
-                        ExecuteAction(5); // Wyœwietl wszystkich klientów
+                        ExecuteActionAsync(5)
+                            .Wait(); // Wyœwietl wszystkich klientów
                     if (selectedIndex == 2)
-                        ExecuteAction(6); // Wyszukaj klienta po emailu
+                        ExecuteActionAsync(6)
+                            .Wait(); // Wyszukaj klienta po emailu
                     break;
             }
         }
@@ -136,7 +139,7 @@ public class MenuHandler
         return selectedIndex;
     }
 
-    private void ExecuteAction(int action)
+    private async Task ExecuteActionAsync(int action)
     {
         switch (action)
         {
@@ -144,16 +147,16 @@ public class MenuHandler
                 _shopActions.DisplayShopInfo(_shop);
                 break;
             case 1:
-                _shopActions.AddNewBouquet(_shop, _dbManager);
+                await _shopActions.AddNewBouquetAsync(_shop, _dbManager);
                 break;
             case 2:
-                _shopActions.AddNewCustomer(_shop, _dbManager);
+                await _shopActions.AddNewCustomerAsync(_shop, _dbManager);
                 break;
             case 3:
-                _shopActions.CreateNewOrder(_shop, _dbManager);
+                await _shopActions.CreateNewOrderAsync(_shop, _dbManager);
                 break;
             case 4:
-                _shopActions.FulfillOrder(_shop, _dbManager);
+                await _shopActions.FulfillOrderAsync(_shop, _dbManager);
                 break;
             case 5:
                 _shopActions.DisplayAllCustomers(_shop);
@@ -168,7 +171,7 @@ public class MenuHandler
                 _shopActions.DisplayAllFlowers(_shop);
                 break;
             case 9:
-                _dbManager.SaveData(_shop);
+                await _dbManager.SaveDataAsync(_shop);
                 break;
             default:
                 Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");

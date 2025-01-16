@@ -7,7 +7,7 @@ using ConsoleTables;
 
 internal class Program
 {
-    private static void Main()
+    private static async Task Main()
     {
         // Tworzenie instancji DatabaseManager
         DatabaseManager dbManager = new();
@@ -22,11 +22,11 @@ internal class Program
             new List<Order>(),
             new List<Customer>()
         );
-        dbManager.LoadData(shop);
+        await dbManager.LoadDataAsync(shop);
 
-        // Sprawdzenie, czy baza danych jest pusta
-        if (shop.Flowers.Count == 0 && shop.Bouquets.Count == 0 &&
-            shop.Orders.Count == 0 && shop.Customers.Count == 0)
+        // Sprawdzenie, czy dane są już zainicjalizowane
+        if (!shop.Flowers.Any() && !shop.Bouquets.Any() && !shop.Orders.Any() &&
+            !shop.Customers.Any())
         {
             // Inicjalizacja danych
             List<Flower> flowers = new()
@@ -89,7 +89,7 @@ internal class Program
                 { customer1, customer2, customer3 });
 
             // Zapisanie danych do bazy danych
-            dbManager.SaveData(shop);
+            await dbManager.SaveDataAsync(shop);
         }
 
         // Tworzenie instancji MenuHandler
@@ -105,16 +105,16 @@ internal class Program
                     shopActions.DisplayShopInfo(shop);
                     break;
                 case 1:
-                    shopActions.AddNewBouquet(shop, dbManager);
+                    await shopActions.AddNewBouquetAsync(shop, dbManager);
                     break;
                 case 2:
-                    shopActions.AddNewCustomer(shop, dbManager);
+                    await shopActions.AddNewCustomerAsync(shop, dbManager);
                     break;
                 case 3:
-                    shopActions.CreateNewOrder(shop, dbManager);
+                    await shopActions.CreateNewOrderAsync(shop, dbManager);
                     break;
                 case 4:
-                    shopActions.FulfillOrder(shop, dbManager);
+                    await shopActions.FulfillOrderAsync(shop, dbManager);
                     break;
                 case 5:
                     shopActions.DisplayAllCustomers(shop);
@@ -129,7 +129,7 @@ internal class Program
                     shopActions.DisplayAllFlowers(shop);
                     break;
                 case 9:
-                    dbManager.SaveData(shop);
+                    await dbManager.SaveDataAsync(shop);
                     return;
                 default:
                     Console.WriteLine("Nieprawidłowy wybór. Spróbuj ponownie.");

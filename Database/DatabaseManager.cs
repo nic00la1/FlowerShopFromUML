@@ -5,12 +5,12 @@ public class DatabaseManager
 {
     private const string ConnectionString = "Data Source=flowershop.db";
 
-    public void SaveData(Shop shop)
+    public async Task SaveDataAsync(Shop shop)
     {
         try
         {
             using SqliteConnection connection = new(ConnectionString);
-            connection.Open();
+            await connection.OpenAsync();
 
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"
@@ -40,13 +40,11 @@ public class DatabaseManager
                     BouquetName TEXT
                 );
             ";
-            command.ExecuteNonQuery();
-
-            Console.WriteLine("Tabele zosta³y utworzone pomyœlnie.");
+            await command.ExecuteNonQueryAsync();
 
             // Save Flowers
             command.CommandText = "DELETE FROM Flowers";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             foreach (Flower flower in shop.Flowers)
             {
                 command.CommandText = @"
@@ -56,13 +54,13 @@ public class DatabaseManager
                 command.Parameters.AddWithValue("$color", flower.Color);
                 command.Parameters.AddWithValue("$price", flower.Price);
                 command.Parameters.AddWithValue("$inStock", flower.InStock);
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
                 command.Parameters.Clear();
             }
 
             // Save Bouquets
             command.CommandText = "DELETE FROM Bouquets";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             foreach (Bouquet bouquet in shop.Bouquets)
             {
                 command.CommandText = @"
@@ -71,13 +69,13 @@ public class DatabaseManager
                 command.Parameters.AddWithValue("$name", bouquet.Name);
                 command.Parameters.AddWithValue("$price", bouquet.Price);
                 command.Parameters.AddWithValue("$inStock", bouquet.InStock);
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
                 command.Parameters.Clear();
             }
 
             // Save Customers
             command.CommandText = "DELETE FROM Customers";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             foreach (Customer customer in shop.Customers)
             {
                 command.CommandText = @"
@@ -86,15 +84,15 @@ public class DatabaseManager
                 command.Parameters.AddWithValue("$name", customer.Name);
                 command.Parameters.AddWithValue("$email", customer.Email);
                 command.Parameters.AddWithValue("$phone", customer.Phone);
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
                 command.Parameters.Clear();
             }
 
             // Save Orders
             command.CommandText = "DELETE FROM Orders";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             command.CommandText = "DELETE FROM OrderBouquets";
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
             foreach (Order order in shop.Orders)
             {
                 command.CommandText = @"
@@ -106,10 +104,10 @@ public class DatabaseManager
                     order.Customer.Email);
                 command.Parameters.AddWithValue("$totalPrice",
                     order.TotalPrice);
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
 
                 command.CommandText = "SELECT last_insert_rowid()";
-                long orderId = (long)command.ExecuteScalar();
+                long orderId = (long)await command.ExecuteScalarAsync();
 
                 foreach (Bouquet bouquet in order.Bouquets)
                 {
@@ -119,12 +117,10 @@ public class DatabaseManager
                     command.Parameters.AddWithValue("$orderId", orderId);
                     command.Parameters.AddWithValue("$bouquetName",
                         bouquet.Name);
-                    command.ExecuteNonQuery();
+                    await command.ExecuteNonQueryAsync();
                     command.Parameters.Clear();
                 }
             }
-
-            Console.WriteLine("Dane zosta³y zapisane pomyœlnie.");
         }
         catch (Exception ex)
         {
@@ -132,22 +128,22 @@ public class DatabaseManager
         }
     }
 
-    public void LoadData(Shop shop)
+    public async Task LoadDataAsync(Shop shop)
     {
         try
         {
             using SqliteConnection connection = new(ConnectionString);
-            connection.Open();
+            await connection.OpenAsync();
 
             SqliteCommand command = connection.CreateCommand();
 
             // Load Flowers
             command.CommandText =
                 "SELECT Name, Color, Price, InStock FROM Flowers";
-            using (SqliteDataReader reader = command.ExecuteReader())
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
                 shop.Flowers.Clear();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                     shop.Flowers.Add(new Flower(
                         reader.GetString(0),
                         reader.GetString(1),
@@ -158,10 +154,10 @@ public class DatabaseManager
 
             // Load Bouquets
             command.CommandText = "SELECT Name, Price, InStock FROM Bouquets";
-            using (SqliteDataReader reader = command.ExecuteReader())
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
                 shop.Bouquets.Clear();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                     shop.Bouquets.Add(new Bouquet(
                         reader.GetString(0),
                         new List<FlowerCopy>(), // Flowers will be loaded later
@@ -172,10 +168,10 @@ public class DatabaseManager
 
             // Load Customers
             command.CommandText = "SELECT Name, Email, Phone FROM Customers";
-            using (SqliteDataReader reader = command.ExecuteReader())
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
                 shop.Customers.Clear();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                     shop.Customers.Add(new Customer(
                         reader.GetString(0),
                         reader.GetString(1),
@@ -186,10 +182,10 @@ public class DatabaseManager
             // Load Orders
             command.CommandText =
                 "SELECT OrderDate, CustomerEmail, TotalPrice FROM Orders";
-            using (SqliteDataReader reader = command.ExecuteReader())
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
                 shop.Orders.Clear();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     Customer? customer =
                         shop.Customers.Find(c =>
@@ -208,9 +204,9 @@ public class DatabaseManager
             // Load OrderBouquets
             command.CommandText =
                 "SELECT OrderId, BouquetName FROM OrderBouquets";
-            using (SqliteDataReader reader = command.ExecuteReader())
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     Order order = shop.Orders[(int)reader.GetInt64(0) - 1];
                     Bouquet? bouquet =
@@ -219,8 +215,6 @@ public class DatabaseManager
                         order.Bouquets.Add(bouquet);
                 }
             }
-
-            Console.WriteLine("Dane zosta³y wczytane pomyœlnie.");
         }
         catch (Exception ex)
         {
