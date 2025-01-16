@@ -385,9 +385,12 @@ public class ShopActions
             int index = 1;
             foreach (Bouquet bouquet in shop.Bouquets)
             {
-                string flowers = string.Join(", ",
-                    bouquet.Flowers.Select(f =>
-                        $"{f.Name} ({f.Color}) x{f.Count}"));
+                string flowers =
+                    bouquet.Flowers != null && bouquet.Flowers.Any()
+                        ? string.Join(", ",
+                            bouquet.Flowers.Select(f =>
+                                $"{f.Name} ({f.Color}) x{f.Count}"))
+                        : "Brak kwiatów";
                 table.AddRow(index++, bouquet.Name, bouquet.Price,
                     bouquet.InStock, flowers);
             }

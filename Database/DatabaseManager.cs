@@ -25,6 +25,12 @@ public class DatabaseManager
                     Price REAL,
                     InStock INTEGER
                 );
+                CREATE TABLE IF NOT EXISTS FlowerCopies (
+                    BouquetName TEXT,
+                    Name TEXT,
+                    Color TEXT,
+                    Count INTEGER
+                );
                 CREATE TABLE IF NOT EXISTS Customers (
                     Name TEXT,
                     Email TEXT,
@@ -61,6 +67,8 @@ public class DatabaseManager
             // Save Bouquets
             command.CommandText = "DELETE FROM Bouquets";
             await command.ExecuteNonQueryAsync();
+            command.CommandText = "DELETE FROM FlowerCopies";
+            await command.ExecuteNonQueryAsync();
             foreach (Bouquet bouquet in shop.Bouquets)
             {
                 command.CommandText = @"
@@ -71,6 +79,20 @@ public class DatabaseManager
                 command.Parameters.AddWithValue("$inStock", bouquet.InStock);
                 await command.ExecuteNonQueryAsync();
                 command.Parameters.Clear();
+
+                foreach (FlowerCopy flower in bouquet.Flowers)
+                {
+                    command.CommandText = @"
+                        INSERT INTO FlowerCopies (BouquetName, Name, Color, Count)
+                        VALUES ($bouquetName, $name, $color, $count)";
+                    command.Parameters.AddWithValue("$bouquetName",
+                        bouquet.Name);
+                    command.Parameters.AddWithValue("$name", flower.Name);
+                    command.Parameters.AddWithValue("$color", flower.Color);
+                    command.Parameters.AddWithValue("$count", flower.Count);
+                    await command.ExecuteNonQueryAsync();
+                    command.Parameters.Clear();
+                }
             }
 
             // Save Customers
@@ -164,6 +186,25 @@ public class DatabaseManager
                         reader.GetFloat(1),
                         reader.GetInt32(2)
                     ));
+            }
+
+            // Load FlowerCopies
+            command.CommandText =
+                "SELECT BouquetName, Name, Color, Count FROM FlowerCopies";
+            using (SqliteDataReader reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    Bouquet? bouquet =
+                        shop.Bouquets.FirstOrDefault(b =>
+                            b.Name == reader.GetString(0));
+                    if (bouquet != null)
+                        bouquet.Flowers.Add(new FlowerCopy(
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            reader.GetInt32(3)
+                        ));
+                }
             }
 
             // Load Customers
