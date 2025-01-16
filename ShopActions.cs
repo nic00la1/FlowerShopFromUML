@@ -443,4 +443,37 @@ public class ShopActions
 
         DisplayMessageAndWait("");
     }
+
+    public async Task AddNewFlowerAsync(Shop shop, DatabaseManager dbManager)
+    {
+        DisplayTitle("Dodawanie nowego kwiatu");
+
+        string name = GetInput("Podaj nazwê kwiatu:");
+        string color = GetInput("Podaj kolor kwiatu:");
+        float price = GetValidatedInput("Podaj cenê kwiatu:",
+            input => (float.TryParse(input, out float result), result));
+        int inStock = GetValidatedInput("Podaj iloœæ kwiatu w magazynie:",
+            input => (int.TryParse(input, out int result), result));
+
+        // Sprawdzenie, czy kwiat o tej samej nazwie i kolorze ju¿ istnieje
+        Flower? existingFlower = shop.Flowers.FirstOrDefault(f =>
+            f.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+            f.Color.Equals(color, StringComparison.OrdinalIgnoreCase));
+
+        if (existingFlower != null)
+        {
+            // Zwiêkszenie iloœci istniej¹cego kwiatu
+            existingFlower.InStock += inStock;
+            existingFlower.Price = price; // Aktualizacja ceny, jeœli jest inna
+        } else
+        {
+            // Dodanie nowego kwiatu
+            Flower newFlower = new(name, color, price, inStock);
+            shop.Flowers.Add(newFlower);
+        }
+
+        await dbManager.SaveDataAsync(shop); // Save data to the database
+        DisplayMessageAndWait(
+            $"Liczba kwiatów po dodaniu nowego: {shop.Flowers.Count}");
+    }
 }

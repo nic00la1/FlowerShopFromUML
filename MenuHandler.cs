@@ -25,6 +25,8 @@ public class MenuHandler
             "Wyœwietl informacje o sklepie",
             "Opcje bukietów",
             "Opcje klientów",
+            "Opcje kwiatów",
+            "Opcje zamówieñ",
             "WyjdŸ"
         };
 
@@ -40,6 +42,20 @@ public class MenuHandler
             "Dodaj nowego klienta",
             "Wyœwietl wszystkich klientów",
             "Wyszukaj klienta po emailu",
+            "Powrót do g³ównego menu"
+        };
+
+        string[] flowerOptions =
+        {
+            "Dodaj kwiat",
+            "Wyœwietl wszystkie kwiaty",
+            "Powrót do g³ównego menu"
+        };
+
+        string[] orderOptions =
+        {
+            "Tworzenie zamówienia",
+            "Realizuj¹ce zamówienie",
             "Powrót do g³ównego menu"
         };
 
@@ -59,6 +75,12 @@ public class MenuHandler
                     DisplaySubMenu(customerOptions, "Opcje klientów");
                     break;
                 case 3:
+                    DisplaySubMenu(flowerOptions, "Opcje kwiatów");
+                    break;
+                case 4:
+                    DisplaySubMenu(orderOptions, "Opcje zamówieñ");
+                    break;
+                case 5:
                     return 9; // WyjdŸ
                 default:
                     Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");
@@ -95,6 +117,19 @@ public class MenuHandler
                         ExecuteActionAsync(6)
                             .Wait(); // Wyszukaj klienta po emailu
                     break;
+                case "Opcje kwiatów":
+                    if (selectedIndex == 0)
+                        ExecuteActionAsync(10).Wait(); // Dodaj kwiat
+                    if (selectedIndex == 1)
+                        ExecuteActionAsync(8)
+                            .Wait(); // Wyœwietl wszystkie kwiaty
+                    break;
+                case "Opcje zamówieñ":
+                    if (selectedIndex == 0)
+                        ExecuteActionAsync(3).Wait(); // Tworzenie zamówienia
+                    if (selectedIndex == 1)
+                        ExecuteActionAsync(4).Wait(); // Realizuj¹ce zamówienie
+                    break;
             }
         }
     }
@@ -113,6 +148,9 @@ public class MenuHandler
             Console.WriteLine("Wybierz akcjê (u¿yj strza³ek):\n");
 
             for (int i = 0; i < options.Length; i++)
+            {
+                if (i == options.Length - 1) Console.WriteLine();
+
                 if (i == selectedIndex)
                 {
                     Console.ForegroundColor = ConsoleColor.White;
@@ -121,6 +159,7 @@ public class MenuHandler
                     Console.ResetColor();
                 } else
                     Console.WriteLine($"   {options[i]}");
+            }
 
             DrawRose();
 
@@ -172,6 +211,9 @@ public class MenuHandler
                 break;
             case 9:
                 await _dbManager.SaveDataAsync(_shop);
+                break;
+            case 10:
+                await _shopActions.AddNewFlowerAsync(_shop, _dbManager);
                 break;
             default:
                 Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");
