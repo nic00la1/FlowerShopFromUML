@@ -181,10 +181,16 @@ public class ShopActions
             bouquetOptions);
 
         string name;
+        List<FlowerCopy> flowerCopies = new();
         if (selectedBouquetIndex == shop.Bouquets.Count)
             name = GetInput("Podaj nazwê nowego bukietu:");
         else
-            name = shop.Bouquets[selectedBouquetIndex].Name;
+        {
+            Bouquet selectedBouquet = shop.Bouquets[selectedBouquetIndex];
+            name = selectedBouquet.Name;
+            flowerCopies = selectedBouquet.Flowers
+                .Select(f => new FlowerCopy(f.Name, f.Color, f.Count)).ToList();
+        }
 
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -193,7 +199,6 @@ public class ShopActions
             return;
         }
 
-        List<FlowerCopy> flowerCopies = new();
         while (true)
         {
             // Prepare options for the flower menu
@@ -204,8 +209,11 @@ public class ShopActions
             flowerOptions.Add("Zakoñcz wybieranie kwiatów");
 
             // Display flower menu and get selected index
+            string currentFlowers = string.Join(", ",
+                flowerCopies.Select(f =>
+                    $"{f.Name} ({f.Color}) x{f.Count}"));
             int selectedFlowerIndex = DisplayMenu(
-                "Wybierz kwiat z listy (lub zakoñcz wybieranie)",
+                $"Wybrany bukiet: {name}\nWybierz kwiat z listy (lub zakoñcz wybieranie)\nAktualne kwiaty w bukiecie: {currentFlowers}",
                 flowerOptions);
 
             if (selectedFlowerIndex == shop.Flowers.Count) break;
@@ -220,8 +228,14 @@ public class ShopActions
                     return (isValid, result);
                 });
 
-            flowerCopies.Add(new FlowerCopy(selectedFlower.Name,
-                selectedFlower.Color, count));
+            FlowerCopy? existingFlower = flowerCopies.FirstOrDefault(f =>
+                f.Name == selectedFlower.Name &&
+                f.Color == selectedFlower.Color);
+            if (existingFlower != null)
+                existingFlower.Count += count;
+            else
+                flowerCopies.Add(new FlowerCopy(selectedFlower.Name,
+                    selectedFlower.Color, count));
 
             string addMore =
                 GetInput(
