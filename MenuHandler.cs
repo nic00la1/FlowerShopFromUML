@@ -55,7 +55,9 @@ public class MenuHandler
         string[] orderOptions =
         {
             "Tworzenie zamówienia",
-            "Realizuj¹ce zamówienie",
+            "Realizacja zamówienie",
+            "Zamówienia oczekuj¹ce na realizacjê",
+            "Zamówienia zrealizowane",
             "Powrót do g³ównego menu"
         };
 
@@ -129,6 +131,12 @@ public class MenuHandler
                         ExecuteActionAsync(3).Wait(); // Tworzenie zamówienia
                     if (selectedIndex == 1)
                         ExecuteActionAsync(4).Wait(); // Realizuj¹ce zamówienie
+                    if (selectedIndex == 2)
+                        ExecuteActionAsync(11)
+                            .Wait(); // Zamówienia gotowe do realizacji
+                    if (selectedIndex == 3)
+                        ExecuteActionAsync(12)
+                            .Wait(); // Zamówienia zrealizowane
                     break;
             }
         }
@@ -214,6 +222,12 @@ public class MenuHandler
                 break;
             case 10:
                 await _shopActions.AddNewFlowerAsync(_shop, _dbManager);
+                break;
+            case 11:
+                _shopActions.DisplayReadyOrders(_shop);
+                break;
+            case 12:
+                _shopActions.DisplayCompletedOrders(_shop);
                 break;
             default:
                 Console.WriteLine("Nieprawid³owy wybór. Spróbuj ponownie.");

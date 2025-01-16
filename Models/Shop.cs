@@ -14,6 +14,14 @@ public class Shop
     public List<Bouquet> Bouquets { get; set; }
     public List<Order> Orders { get; set; }
     public List<Customer> Customers { get; set; }
+    private int _nextOrderId = 1; // Counter for generating unique order IDs
+
+    public int NextOrderId
+    {
+        get => _nextOrderId;
+        set => _nextOrderId = value;
+    }
+
 
     public Shop(string name,
                 string address,
@@ -91,12 +99,14 @@ public class Shop
     public void CreateOrder(Customer customer, List<Bouquet> bouquets)
     {
         float totalPrice = bouquets.Sum(b => b.Price);
-        Orders.Add(new Order(DateTime.Now, customer, bouquets, totalPrice));
+        Order newOrder = new(_nextOrderId++, DateTime.Now, customer, bouquets,
+            totalPrice, "Oczekujące");
+        Orders.Add(newOrder);
     }
 
     public void FulfillOrder(Order order)
     {
-        Orders.Remove(order);
+        order.Status = "Zrealizowane";
         foreach (Bouquet bouquet in order.Bouquets)
         {
             Bouquet? shopBouquet = Bouquets.Find(b => b.Name == bouquet.Name);

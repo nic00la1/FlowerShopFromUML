@@ -74,11 +74,12 @@ internal class Program
 
             List<Order> orders = new()
             {
-                new Order(DateTime.Now, customer1,
+                new Order(1, DateTime.Now, customer1,
                     new List<Bouquet> { bouquets[0], bouquets[1] },
-                    bouquets[0].Price + bouquets[1].Price),
-                new Order(DateTime.Now, customer2,
-                    new List<Bouquet> { bouquets[2] }, bouquets[2].Price)
+                    bouquets[0].Price + bouquets[1].Price, "Oczekujące"),
+                new Order(2, DateTime.Now, customer2,
+                    new List<Bouquet> { bouquets[2] }, bouquets[2].Price,
+                    "Oczekujące")
             };
 
             // Dodanie zainicjalizowanych danych do sklepu

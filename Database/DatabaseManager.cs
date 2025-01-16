@@ -12,6 +12,8 @@ public class DatabaseManager
             using SqliteConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
+            using SqliteTransaction transaction = connection.BeginTransaction();
+
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Flowers (
@@ -37,9 +39,11 @@ public class DatabaseManager
                     Phone TEXT
                 );
                 CREATE TABLE IF NOT EXISTS Orders (
+                    Id INTEGER PRIMARY KEY,
                     OrderDate TEXT,
                     CustomerEmail TEXT,
-                    TotalPrice REAL
+                    TotalPrice REAL,
+                    Status TEXT
                 );
                 CREATE TABLE IF NOT EXISTS OrderBouquets (
                     OrderId INTEGER,
@@ -117,32 +121,38 @@ public class DatabaseManager
             await command.ExecuteNonQueryAsync();
             foreach (Order order in shop.Orders)
             {
+                Console.WriteLine(
+                    $"Saving Order: Id={order.Id}, OrderDate={order.OrderDate}, CustomerEmail={order.Customer.Email}, TotalPrice={order.TotalPrice}, Status={order.Status}");
                 command.CommandText = @"
-                    INSERT INTO Orders (OrderDate, CustomerEmail, TotalPrice)
-                    VALUES ($orderDate, $customerEmail, $totalPrice)";
+                    INSERT INTO Orders (Id, OrderDate, CustomerEmail, TotalPrice, Status)
+                    VALUES ($id, $orderDate, $customerEmail, $totalPrice, $status)";
+                command.Parameters.AddWithValue("$id", order.Id);
                 command.Parameters.AddWithValue("$orderDate",
                     order.OrderDate.ToString("o"));
                 command.Parameters.AddWithValue("$customerEmail",
                     order.Customer.Email);
                 command.Parameters.AddWithValue("$totalPrice",
                     order.TotalPrice);
+                command.Parameters.AddWithValue("$status", order.Status);
                 await command.ExecuteNonQueryAsync();
-
-                command.CommandText = "SELECT last_insert_rowid()";
-                long orderId = (long)await command.ExecuteScalarAsync();
+                command.Parameters.Clear();
 
                 foreach (Bouquet bouquet in order.Bouquets)
                 {
+                    Console.WriteLine(
+                        $"Saving OrderBouquet: OrderId={order.Id}, BouquetName={bouquet.Name}");
                     command.CommandText = @"
                         INSERT INTO OrderBouquets (OrderId, BouquetName)
                         VALUES ($orderId, $bouquetName)";
-                    command.Parameters.AddWithValue("$orderId", orderId);
+                    command.Parameters.AddWithValue("$orderId", order.Id);
                     command.Parameters.AddWithValue("$bouquetName",
                         bouquet.Name);
                     await command.ExecuteNonQueryAsync();
                     command.Parameters.Clear();
                 }
             }
+
+            await transaction.CommitAsync();
         }
         catch (Exception ex)
         {
@@ -222,24 +232,33 @@ public class DatabaseManager
 
             // Load Orders
             command.CommandText =
-                "SELECT OrderDate, CustomerEmail, TotalPrice FROM Orders";
+                "SELECT Id, OrderDate, CustomerEmail, TotalPrice, Status FROM Orders";
             using (SqliteDataReader reader = await command.ExecuteReaderAsync())
             {
                 shop.Orders.Clear();
+                int maxOrderId = 0;
                 while (await reader.ReadAsync())
                 {
                     Customer? customer =
                         shop.Customers.Find(c =>
-                            c.Email == reader.GetString(1));
+                            c.Email == reader.GetString(2));
                     if (customer != null)
+                    {
+                        int orderId = reader.GetInt32(0);
                         shop.Orders.Add(new Order(
-                            DateTime.Parse(reader.GetString(0)),
+                            orderId,
+                            DateTime.Parse(reader.GetString(1)),
                             customer,
                             new List<
                                 Bouquet>(), // Bouquets will be loaded later
-                            reader.GetFloat(2)
+                            reader.GetFloat(3),
+                            reader.GetString(4)
                         ));
+                        if (orderId > maxOrderId) maxOrderId = orderId;
+                    }
                 }
+
+                shop.NextOrderId = maxOrderId + 1;
             }
 
             // Load OrderBouquets
@@ -249,9 +268,12 @@ public class DatabaseManager
             {
                 while (await reader.ReadAsync())
                 {
-                    Order order = shop.Orders[(int)reader.GetInt64(0) - 1];
+                    Order? order =
+                        shop.Orders.FirstOrDefault(o =>
+                            o.Id == reader.GetInt32(0));
                     Bouquet? bouquet =
-                        shop.Bouquets.Find(b => b.Name == reader.GetString(1));
+                        shop.Bouquets.FirstOrDefault(b =>
+                            b.Name == reader.GetString(1));
                     if (order != null && bouquet != null)
                         order.Bouquets.Add(bouquet);
                 }

@@ -476,4 +476,66 @@ public class ShopActions
         DisplayMessageAndWait(
             $"Liczba kwiatów po dodaniu nowego: {shop.Flowers.Count}");
     }
+
+    public void DisplayReadyOrders(Shop shop)
+    {
+        DisplayTitle("Zamówienia gotowe do realizacji");
+
+        List<Order> readyOrders = shop.Orders.Where(o =>
+                o.Status.Equals("Oczekuj¹ce",
+                    StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (readyOrders.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Brak zamówieñ gotowych do realizacji.");
+            Console.ResetColor();
+        } else
+        {
+            ConsoleTable table = new("Nr", "Data zamówienia", "Klient",
+                "Bukiety", "Cena [z³]");
+            foreach (Order order in readyOrders)
+            {
+                string bouquets = string.Join(", ",
+                    order.Bouquets.Select(b => b.Name));
+                table.AddRow(order.Id, order.OrderDate, order.Customer.Name,
+                    bouquets, order.TotalPrice);
+            }
+
+            table.Write();
+        }
+
+        DisplayMessageAndWait("");
+    }
+
+    public void DisplayCompletedOrders(Shop shop)
+    {
+        DisplayTitle("Zamówienia zrealizowane");
+
+        List<Order> completedOrders = shop.Orders.Where(o =>
+                o.Status.Equals("Zrealizowane",
+                    StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (completedOrders.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Brak zrealizowanych zamówieñ.");
+            Console.ResetColor();
+        } else
+        {
+            ConsoleTable table = new("Nr", "Data zamówienia", "Klient",
+                "Bukiety", "Cena [z³]");
+            foreach (Order order in completedOrders)
+            {
+                string bouquets = string.Join(", ",
+                    order.Bouquets.Select(b => b.Name));
+                table.AddRow(order.Id, order.OrderDate, order.Customer.Name,
+                    bouquets, order.TotalPrice);
+            }
+
+            table.Write();
+        }
+
+        DisplayMessageAndWait("");
+    }
 }
